@@ -133,6 +133,42 @@ def timeleft():
 def start_api():
     app.run(port=5000)
 
+@app.route("/addtime", methods=["POST"])
+def add_time():
+
+    token = os.getenv("CHASTER_TOKEN")
+    lock_id = os.getenv("LOCK_ID")
+
+    if not token or not lock_id:
+        return jsonify({"error": "Lock not configured"}), 400
+
+    data = request.json
+
+    if not data or "milseconds" not in data:
+        return jsonify({"error": "Missing 'milseconds' field"}), 400
+
+    milseconds = int(data["milseconds"])
+
+    url = f"https://api.chaster.app/locks/{lock_id}/update-time"
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "duration": milseconds
+    }
+
+    r = requests.post(url, headers=headers, json=payload)
+
+    if r.status_code != 204:
+        return jsonify({"error": r.text}), r.status_code
+
+    return jsonify({
+        "status": "success",
+        "added_milseconds": milseconds
+    })
 
 # ------------------------
 # GUI
