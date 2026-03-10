@@ -1,25 +1,27 @@
-# Chaster Lock Time API
+# Chaster Cyber Lock Timer
 
-A small API service that retrieves the remaining time from an active lock using the **Chaster API** and returns the remaining time as a formatted string.
+A cyber-styled desktop timer that connects to the **Chaster API** and displays the remaining lock time for an active lock.
 
-The service caches the lock data to avoid excessive API requests and rate limits.
-
----
-
-## Features
-
-* Retrieves active lock information from Chaster
-* Returns **remaining lock time as a formatted string**
-* Built-in **30 second cache** to prevent API spam
-* Simple **HTTP endpoint**
-* Easy configuration using environment variables
+The application provides a clean cyber-terminal interface, automatically remembers your configuration, and exposes a simple local API endpoint so other programs can request the remaining time.
 
 ---
 
-## Requirements
+# Features
 
-* Python 3.9+
-* A Chaster API token
+• Cyber-styled desktop interface
+• Automatically saves API token and selected lock
+• Handles multiple active locks
+• Displays keyholder username
+• Handles hidden timers
+• 30-second API caching to avoid rate limits
+• Local API endpoint for automation
+• Automatically restores configuration on startup
+
+---
+
+# Requirements
+
+• Python 3.9 or newer
 
 Python packages required:
 
@@ -27,65 +29,56 @@ Python packages required:
 * requests
 * python-dotenv
 
+These are included in `requirements.txt`.
+
 ---
 
-## Installation
+# Installation
 
-Clone or download the project and install the dependencies:
+1. Download or clone the project.
+
+2. Install the dependencies:
 
 ```
 pip install -r requirements.txt
 ```
 
----
-
-## Configuration
-
-Create a `.env` file in the project folder.
-
-Example:
+Or simply run:
 
 ```
-CHASTER_TOKEN=your_api_token_here
-PORT=5000
-```
-
-### Environment Variables
-
-| Variable      | Description                 |
-| ------------- | --------------------------- |
-| CHASTER_TOKEN | Your Chaster API token      |
-| PORT          | Port the server will run on |
-
-You can generate an API token from the **Chaster developer/API settings**.
-
----
-
-## Running the Server
-
-Start the server with:
-
-```
-python app.py
-```
-
-The server will start on the configured port (default: 5000).
-
-Example:
-
-```
-http://localhost:5000
+grabRequirements.bat
 ```
 
 ---
 
-## API Endpoint
+# Running the Application
 
-### Get Remaining Lock Time
+Run the program with:
 
 ```
-GET /timeleft
+run.bat
 ```
+
+The desktop interface will open automatically.
+
+---
+
+# First Time Setup
+
+1. Enter your **Chaster API Token**
+2. Click **Fetch Locks**
+3. Select the lock you want to track
+4. Click **Save Lock**
+
+The application will save your configuration to `.env`.
+
+On the next launch your token and lock will automatically reload.
+
+---
+
+# API Endpoint
+
+The application also runs a small local API server.
 
 Example request:
 
@@ -93,52 +86,55 @@ Example request:
 http://localhost:5000/timeleft
 ```
 
-Example response:
+Example responses:
 
 ```
-6d 3h 18m 41s
+5d 11h 22m 03s
 ```
 
-The response is returned as a **plain string** containing the formatted time remaining on the active lock.
+or if the timer is hidden:
+
+```
+hidden
+```
+
+This endpoint can be used by:
+
+• bots
+• dashboards
+• scripts
+• automation tools
 
 ---
 
-## Caching
-
-To prevent hitting the Chaster API too frequently:
-
-* Lock data is cached for **30 seconds**
-* All requests during this period use the cached value
-* The timer is calculated locally from the cached `endDate`
-
-This significantly reduces API usage while keeping the timer accurate.
-
----
-
-## Project Structure
+# Project Structure
 
 ```
-project-folder/
+project/
 │
 ├── app.py
 ├── requirements.txt
-├── .env
+├── .env (will be missing till the app saves the lock)
+├── run.bat
+├── grabRequirements.bat
 └── README.md
 ```
 
 ---
 
-## Example Use Cases
+# Batch Scripts
 
-This API can be used for:
+## run.bat
 
-* Web dashboards
-* Personal automation
-* Server monitoring
-* Bots or scripts that need the remaining lock time
+Runs the application.
+
+## grabRequirements.bat
+
+Installs the required Python packages.
 
 ---
 
-## License
 
-This project is provided as-is for personal use.
+# License
+
+Personal use project.
