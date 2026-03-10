@@ -1,140 +1,90 @@
-# Chaster Cyber Lock Timer
+==============================
+Resonite X Chaster Timer
+==============================
 
-A cyber-styled desktop timer that connects to the **Chaster API** and displays the remaining lock time for an active lock.
+A cyber-styled desktop app for tracking your active Chaster locks. 
+This app shows remaining lock time, keyholder information, and lets 
+you add time remotely via a local API.  
 
-The application provides a clean cyber-terminal interface, automatically remembers your configuration, and exposes a simple local API endpoint so other programs can request the remaining time.
+It’s fully packaged as a .exe — users do NOT need Python or any dependencies. 
+The .exe automatically creates a .env file on first run.  
 
----
+--------------------------------
+Features
+--------------------------------
+- Cyber-terminal styled GUI
+- Shows remaining lock time, updates every second
+- Handles hidden timers gracefully
+- Displays keyholder username
+- Auto-saves API token and lock ID in .env
+- Auto-restores settings on reopen
+- POST endpoint to add time to a lock (default +1 hour)
+- Local /timeleft API for external use
+- Fully self-contained .exe — no Python install required
 
-# Features
+--------------------------------
+Requirements
+--------------------------------
+- Windows 10 or higher
+- Lock must be VISIBLE to see the remaining time
+- Nothing else — the .exe is fully portable
 
-• Cyber-styled desktop interface
-• Automatically saves API token and selected lock
-• Handles multiple active locks
-• Displays keyholder username
-• Handles hidden timers
-• 30-second API caching to avoid rate limits
-• Local API endpoint for automation
-• Automatically restores configuration on startup
+--------------------------------
+First Time Setup
+--------------------------------
+1. Run Resonite X Chaster Timer.exe
+2. Enter your Chaster API Token
+3. Click "Fetch Locks"
+4. Select your lock from the dropdown
+5. Click "Save Lock"
 
----
+- The .env file is created automatically in the same folder as the .exe
+- On subsequent runs, your token and lock are restored automatically
 
-# Requirements
-
-• Python 3.9 or newer
-
-Python packages required:
-
-* Flask
-* requests
-* python-dotenv
-
-These are included in `requirements.txt`.
-
----
-
-# Installation
-
-1. Download or clone the project.
-
-2. Install the dependencies:
-
-```
-pip install -r requirements.txt
-```
-
-Or simply run:
-
-```
-grabRequirements.bat
-```
-
----
-
-# Running the Application
-
-Run the program with:
-
-```
-run.bat
-```
-
-The desktop interface will open automatically.
-
----
-
-# First Time Setup
-
-1. Enter your **Chaster API Token**
-2. Click **Fetch Locks**
-3. Select the lock you want to track
-4. Click **Save Lock**
-
-The application will save your configuration to `.env`.
-
-On the next launch your token and lock will automatically reload.
-
----
-
-# API Endpoint
-
-The application also runs a small local API server.
-
-Example request:
-
-```
+--------------------------------
+Local API Usage
+--------------------------------
+GET Remaining Time:
 http://localhost:5000/timeleft
-```
-
-Example responses:
-
-```
-5d 11h 22m 03s
-```
-
+Example response:
+5d 12h 03m 21s
 or if the timer is hidden:
-
-```
 hidden
-```
 
-This endpoint can be used by:
+POST Add Time to Lock:
+http://localhost:5000/addtime
+Content-Type: application/json
 
-• bots
-• dashboards
-• scripts
-• automation tools
+{
+  "seconds": 3600
+}
 
----
+- Adds 1 hour (3600 seconds) to the lock
+- Returns:
+{
+  "status": "success",
+  "added_seconds": 3600
+}
 
-# Project Structure
+--------------------------------
+Folder / Asset Info
+--------------------------------
+Resonite Folder Path: [Insert your Resonite folder path here]
 
-```
-project/
-│
-├── app.py
-├── requirements.txt
-├── .env (will be missing till the app saves the lock)
-├── run.bat
-├── grabRequirements.bat
-└── README.md
-```
+- Place any assets (images, icons, etc.) here if needed by the app
+- .exe will use this folder for styling and resources
 
----
+--------------------------------
+Sharing
+--------------------------------
+1. Send Resonite X Chaster Timer.exe
+2. Optionally include .env if you want preconfigured token and lock
+3. Users can double-click .exe — no Python, pip, or setup required
 
-# Batch Scripts
-
-## run.bat
-
-Runs the application.
-
-## grabRequirements.bat
-
-Installs the required Python packages.
-
----
-
-
-# License
-
-Personal use project.
+--------------------------------
+Notes
+--------------------------------
+- .env can be manually edited if needed
+- Firewall may ask to allow the app to use port 5000 (for the local API)
+- Hidden timers show as "TIMER HIDDEN" in the GUI and "hidden" via API
+- Lock must be visible to see remaining time

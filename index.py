@@ -174,7 +174,7 @@ def add_time():
 # ------------------------
 
 root = tk.Tk()
-root.title("Chaster Cyber Timer")
+root.title("Resonite X Chaster Timer")
 root.geometry("520x420")
 root.configure(bg=BG)
 
