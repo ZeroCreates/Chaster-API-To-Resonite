@@ -12,13 +12,57 @@ load_dotenv()
 
 ENV_FILE = ".env"
 
+# --- API CACHE ---
 cached_end_date = None
 last_fetch = 0
 CACHE_TIME = 30
 
 app = Flask(__name__)
 
+# --- COLORS (Cyber theme) ---
+BG = "#0a0a0a"
+PANEL = "#111111"
+CYAN = "#00ffff"
+GREEN = "#00ff9c"
+TEXT = "#e0e0e0"
+
+def auto_load_saved_lock():
+
+    global locks
+
+    token = os.getenv("CHASTER_TOKEN")
+    saved_lock = os.getenv("LOCK_ID")
+
+    if not token:
+        return
+
+    try:
+        locks = fetch_locks(token)
+
+        options = []
+
+        selected_index = None
+
+        for i, lock in enumerate(locks):
+
+            option = f"{lock['_id']} | {lock['endDate']}"
+            options.append(option)
+
+            if lock["_id"] == saved_lock:
+                selected_index = i
+
+        lock_dropdown["values"] = options
+
+        if selected_index is not None:
+            lock_dropdown.current(selected_index)
+
+    except:
+        pass
 def format_remaining(end_date):
+
+    if end_date == "HIDDEN":
+        return "TIMER HIDDEN"
+
     end = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
     now = datetime.now(timezone.utc)
 
@@ -26,7 +70,7 @@ def format_remaining(end_date):
     seconds = int(remaining.total_seconds())
 
     if seconds < 0:
-        return "0s"
+        return "UNLOCKED"
 
     days = seconds // 86400
     hours = (seconds % 86400) // 3600
@@ -37,6 +81,7 @@ def format_remaining(end_date):
 
 
 def fetch_locks(token):
+
     url = "https://api.chaster.app/locks?status=active"
 
     headers = {
@@ -49,6 +94,7 @@ def fetch_locks(token):
 
 
 def fetch_end_date(token, lock_id):
+
     global cached_end_date, last_fetch
 
     if time.time() - last_fetch < CACHE_TIME:
@@ -62,18 +108,27 @@ def fetch_end_date(token, lock_id):
 
     r = requests.get(url, headers=headers)
 
-    cached_end_date = r.json()["endDate"]
+    data = r.json()
+
+    # Hidden timer
+    if data.get("endDate") is None:
+        cached_end_date = "HIDDEN"
+    else:
+        cached_end_date = data["endDate"]
+
     last_fetch = time.time()
 
     return cached_end_date
 
 
+# --- API SERVER ---
 def start_api():
     app.run(port=5000)
 
 
 @app.route("/timeleft")
 def timeleft():
+
     token = os.getenv("CHASTER_TOKEN")
     lock_id = os.getenv("LOCK_ID")
 
@@ -85,23 +140,58 @@ def timeleft():
     return format_remaining(end_date)
 
 
-# GUI
+# --- GUI ---
 root = tk.Tk()
-root.title("Chaster Timer")
-
-token_label = tk.Label(root, text="API Token")
-token_label.pack()
-
-token_entry = tk.Entry(root, width=50)
-token_entry.pack()
-
-lock_dropdown = ttk.Combobox(root)
-lock_dropdown.pack()
+root.title("Chaster Cyber Timer")
+root.geometry("500x420")
+root.configure(bg=BG)
 
 locks = []
 
 
+# Title
+title = tk.Label(
+    root,
+    text="CHASTER LOCK TIMER",
+    bg=BG,
+    fg=CYAN,
+    font=("Consolas", 18, "bold")
+)
+
+title.pack(pady=10)
+
+
+# Token Input
+token_label = tk.Label(
+    root,
+    text="API TOKEN",
+    bg=BG,
+    fg=TEXT,
+    font=("Consolas", 10)
+)
+
+token_label.pack()
+
+token_entry = tk.Entry(
+    root,
+    width=45,
+    bg=PANEL,
+    fg=GREEN,
+    insertbackground=GREEN,
+    font=("Consolas", 10),
+    relief="flat"
+)
+
+token_entry.pack(pady=5)
+
+
+# Dropdown
+lock_dropdown = ttk.Combobox(root, width=50)
+lock_dropdown.pack(pady=10)
+
+
 def load_locks():
+
     global locks
 
     token = token_entry.get()
@@ -117,8 +207,16 @@ def load_locks():
 
 
 def save_lock():
+
     token = token_entry.get()
+
+    if not token:
+        return
+
     selected = lock_dropdown.current()
+
+    if selected < 0:
+        return
 
     lock_id = locks[selected]["_id"]
 
@@ -126,7 +224,52 @@ def save_lock():
     set_key(ENV_FILE, "LOCK_ID", lock_id)
 
 
+button_frame = tk.Frame(root, bg=BG)
+button_frame.pack(pady=10)
+
+
+fetch_button = tk.Button(
+    button_frame,
+    text="FETCH LOCKS",
+    command=load_locks,
+    bg=PANEL,
+    fg=CYAN,
+    font=("Consolas", 10, "bold"),
+    relief="flat",
+    padx=20
+)
+
+fetch_button.grid(row=0, column=0, padx=10)
+
+
+save_button = tk.Button(
+    button_frame,
+    text="SAVE LOCK",
+    command=save_lock,
+    bg=PANEL,
+    fg=GREEN,
+    font=("Consolas", 10, "bold"),
+    relief="flat",
+    padx=20
+)
+
+save_button.grid(row=0, column=1, padx=10)
+
+
+# Timer display
+timer_label = tk.Label(
+    root,
+    text="NOT CONFIGURED",
+    bg=BG,
+    fg=GREEN,
+    font=("Consolas", 28, "bold")
+)
+
+timer_label.pack(pady=40)
+
+
 def update_timer():
+
     token = os.getenv("CHASTER_TOKEN")
     lock_id = os.getenv("LOCK_ID")
 
@@ -138,16 +281,10 @@ def update_timer():
     root.after(1000, update_timer)
 
 
-fetch_button = tk.Button(root, text="Fetch Locks", command=load_locks)
-fetch_button.pack()
-
-save_button = tk.Button(root, text="Save Lock", command=save_lock)
-save_button.pack()
-
-timer_label = tk.Label(root, text="Not configured", font=("Arial", 20))
-timer_label.pack()
-
+# Start API in background
 threading.Thread(target=start_api, daemon=True).start()
+
+auto_load_saved_lock()
 
 update_timer()
 
