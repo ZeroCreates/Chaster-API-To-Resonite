@@ -1,364 +1,144 @@
 import os
-import time
 import threading
 import requests
 import tkinter as tk
 from tkinter import ttk
-from datetime import datetime, timezone
+from flask import Flask, request
 from dotenv import load_dotenv, set_key
-from flask import Flask
-# Ensure .env exists
-if not os.path.exists(".env"):
-    with open(".env", "w") as f:
-        f.write("")  # empty file
-load_dotenv()
+from datetime import datetime
+
+# -------------------------
+# CONFIG
+# -------------------------
+
+BACKEND = "https://chaster.zerocreates.org/"  # CHANGE THIS
 
 ENV_FILE = ".env"
 
-TOKEN = os.getenv("CHASTER_TOKEN")
-LOCK_ID = os.getenv("LOCK_ID")
+if not os.path.exists(ENV_FILE):
+    open(ENV_FILE, "w").close()
 
-cached_end_date = None
-last_fetch = 0
-CACHE_TIME = 30
+load_dotenv()
+
+USER_ID = os.getenv("USER_ID")
+LOCK_ID = os.getenv("LOCK_ID")
 
 locks = []
 
-# --- CYBER COLORS ---
-BG = "#0a0a0a"
+# -------------------------
+# COLORS
+# -------------------------
+
+BG = "#0b0b0b"
 PANEL = "#111111"
 CYAN = "#00ffff"
 GREEN = "#00ff9c"
 TEXT = "#e0e0e0"
 
+# -------------------------
+# LOCAL SERVER
+# -------------------------
+
 app = Flask(__name__)
 
+@app.route("/set-user", methods=["POST"])
+def set_user():
 
-# ------------------------
-# API FUNCTIONS
-# ------------------------
+    global USER_ID
 
-def fetch_locks(token):
+    data = request.json
+    user = data.get("userId")
 
-    url = "https://api.chaster.app/locks?status=active"
+    if user:
 
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+        USER_ID = user
 
-    r = requests.get(url, headers=headers)
+        user_entry.delete(0,"end")
+        user_entry.insert(0,user)
 
-    return r.json()
+        set_key(ENV_FILE,"USER_ID",user)
 
+        print("User ID received from login:",user)
 
-def fetch_end_date(token, lock_id):
+    return {"status":"ok"}
 
-    global cached_end_date, last_fetch
+@app.route("/add-time", methods=["POST"])
+def api_add_time():
 
-    if time.time() - last_fetch < CACHE_TIME:
-        return cached_end_date
+    try:
 
-    url = f"https://api.chaster.app/locks/{lock_id}"
+        add_time()  # call your existing function
 
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
+        return jsonify({
+            "success": True,
+            "message": "1 hour added"
+        })
 
-    r = requests.get(url, headers=headers)
+    except Exception as e:
 
-    data = r.json()
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
-    if data.get("endDate") is None:
-        cached_end_date = "HIDDEN"
-    else:
-        cached_end_date = data["endDate"]
-
-    last_fetch = time.time()
-
-    return cached_end_date
-
-
-def get_keyholder(lock):
-
-    if "keyholder" in lock and lock["keyholder"]:
-        return lock["keyholder"].get("username", "Unknown")
-
-    return "Unknown"
-
-
-# ------------------------
-# TIME FORMAT
-# ------------------------
-
-def format_remaining(end_date):
-
-    if end_date == "HIDDEN":
-        return "TIMER HIDDEN"
-
-    end = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-    now = datetime.now(timezone.utc)
-
-    remaining = end - now
-    seconds = int(remaining.total_seconds())
-
-    if seconds <= 0:
-        return "UNLOCKED"
-
-    days = seconds // 86400
-    hours = (seconds % 86400) // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
-
-    return f"{days}d {hours}h {minutes}m {seconds}s"
-
-
-# ------------------------
-# LOCAL API
-# ------------------------
-
-@app.route("/timeleft")
-def timeleft():
-
-    token = os.getenv("CHASTER_TOKEN")
-    lock_id = os.getenv("LOCK_ID")
-
-    if not token or not lock_id:
-        return "not configured"
-
-    end_date = fetch_end_date(token, lock_id)
-
-    if end_date == "HIDDEN":
-        return "hidden"
-
-    return format_remaining(end_date)
-
-
-def start_api():
-    app.run(port=5000)
-
-@app.route("/addtime", methods=["POST"])
-def add_time():
-
-    token = os.getenv("CHASTER_TOKEN")
-    lock_id = os.getenv("LOCK_ID")
-
-    if not token or not lock_id:
-        return jsonify({"error": "Lock not configured"}), 400
-    
-
-    milseconds = int(3600000)
-
-    url = f"https://api.chaster.app/locks/{lock_id}/update-time"
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "duration": milseconds
-    }
-
-    r = requests.post(url, headers=headers, json=payload)
-
-    if r.status_code != 204:
-        return jsonify({"error": r.text}), r.status_code
+@app.route("/time", methods=["GET"])
+def get_time():
 
     return jsonify({
-        "status": "success",
-        "added_milseconds": milseconds
+        "remaining": timer_label.cget("text"),
+        "lock_id": LOCK_ID,
+        "user_id": USER_ID
     })
 
-# ------------------------
-# GUI
-# ------------------------
+def run_server():
+    app.run(port=5000)
 
-root = tk.Tk()
-root.title("Resonite X Chaster Timer")
-root.geometry("520x420")
-root.configure(bg=BG)
+threading.Thread(target=run_server,daemon=True).start()
 
+# -------------------------
+# API FUNCTIONS
+# -------------------------
 
-title = tk.Label(
-    root,
-    text="CHASTER LOCK TERMINAL",
-    bg=BG,
-    fg=CYAN,
-    font=("Consolas", 18, "bold")
-)
-
-title.pack(pady=10)
-
-
-token_label = tk.Label(
-    root,
-    text="API TOKEN",
-    bg=BG,
-    fg=TEXT,
-    font=("Consolas", 10)
-)
-
-token_label.pack()
-
-token_entry = tk.Entry(
-    root,
-    width=50,
-    bg=PANEL,
-    fg=GREEN,
-    insertbackground=GREEN,
-    relief="flat",
-    font=("Consolas", 10)
-)
-
-token_entry.pack(pady=5)
-
-
-if TOKEN:
-    token_entry.insert(0, TOKEN)
-
-
-lock_dropdown = ttk.Combobox(root, width=55)
-lock_dropdown.pack(pady=10)
-
-
-keyholder_label = tk.Label(
-    root,
-    text="KEYHOLDER: UNKNOWN",
-    bg=BG,
-    fg=CYAN,
-    font=("Consolas", 12, "bold")
-)
-
-keyholder_label.pack(pady=5)
-
-
-# ------------------------
-# BUTTON FUNCTIONS
-# ------------------------
-
-def load_locks():
+def fetch_locks():
 
     global locks
+    global LOCK_ID
 
-    token = token_entry.get()
+    user = user_entry.get().strip()
 
-    if not token:
+    if not user:
+        print("User ID missing")
         return
 
     try:
 
-        locks = fetch_locks(token)
+        r = requests.get(f"{BACKEND}/locks/{user}")
 
-        options = []
+        print("STATUS:", r.status_code)
+        print("RESPONSE:", r.text)
 
-        for lock in locks:
-
-            keyholder = get_keyholder(lock)
-
-            label = f"{lock['_id']} | KH: {keyholder}"
-
-            options.append(label)
-
-        lock_dropdown["values"] = options
-
-    except:
-        pass
-
-
-def save_lock():
-
-    token = token_entry.get()
-
-    selected = lock_dropdown.current()
-
-    if selected < 0:
-        return
-
-    lock = locks[selected]
-
-    lock_id = lock["_id"]
-    keyholder = get_keyholder(lock)
-
-    set_key(ENV_FILE, "CHASTER_TOKEN", token)
-    set_key(ENV_FILE, "LOCK_ID", lock_id)
-
-    keyholder_label.config(text=f"KEYHOLDER: {keyholder}")
-
-
-button_frame = tk.Frame(root, bg=BG)
-button_frame.pack(pady=10)
-
-
-fetch_button = tk.Button(
-    button_frame,
-    text="FETCH LOCKS",
-    command=load_locks,
-    bg=PANEL,
-    fg=CYAN,
-    font=("Consolas", 10, "bold"),
-    relief="flat",
-    padx=20
-)
-
-fetch_button.grid(row=0, column=0, padx=10)
-
-
-save_button = tk.Button(
-    button_frame,
-    text="SAVE LOCK",
-    command=save_lock,
-    bg=PANEL,
-    fg=GREEN,
-    font=("Consolas", 10, "bold"),
-    relief="flat",
-    padx=20
-)
-
-save_button.grid(row=0, column=1, padx=10)
-
-
-timer_label = tk.Label(
-    root,
-    text="NOT CONFIGURED",
-    bg=BG,
-    fg=GREEN,
-    font=("Consolas", 30, "bold")
-)
-
-timer_label.pack(pady=40)
-
-
-# ------------------------
-# AUTO LOAD SAVED LOCK
-# ------------------------
-
-def auto_load_saved_lock():
-
-    global locks
-
-    token = os.getenv("CHASTER_TOKEN")
-    saved_lock = os.getenv("LOCK_ID")
-
-    if not token:
-        return
-
-    try:
-
-        locks = fetch_locks(token)
+        locks = r.json()
 
         options = []
         selected_index = None
 
         for i, lock in enumerate(locks):
 
-            keyholder = get_keyholder(lock)
+            lock_id = lock.get("_id") or lock.get("lock_id")
 
-            label = f"{lock['_id']} | KH: {keyholder}"
+            kh = "Unknown"
 
-            options.append(label)
+            if isinstance(lock.get("keyholder"), dict):
+                kh = lock["keyholder"].get("username", "Unknown")
+            else:
+                kh = lock.get("keyholder", "Unknown")
 
-            if lock["_id"] == saved_lock:
+            options.append(f"{lock_id} | KH: {kh}")
+
+            # auto select saved lock
+            if LOCK_ID and lock_id == LOCK_ID:
                 selected_index = i
+                keyholder_label.config(text=f"KEYHOLDER: {kh}")
 
         lock_dropdown["values"] = options
 
@@ -366,42 +146,201 @@ def auto_load_saved_lock():
 
             lock_dropdown.current(selected_index)
 
-            keyholder = get_keyholder(locks[selected_index])
+            print("Auto-selected saved lock:", LOCK_ID)
 
-            keyholder_label.config(text=f"KEYHOLDER: {keyholder}")
+        else:
 
-    except:
-        pass
+            print("Saved lock not found")
 
+    except Exception as e:
 
-# ------------------------
-# TIMER UPDATE
-# ------------------------
-
-def update_timer():
-
-    token = os.getenv("CHASTER_TOKEN")
-    lock_id = os.getenv("LOCK_ID")
-
-    if token and lock_id:
-
-        end_date = fetch_end_date(token, lock_id)
-
-        remaining = format_remaining(end_date)
-
-        timer_label.config(text=remaining)
-
-    root.after(1000, update_timer)
+        print("Lock fetch error:", e)
 
 
-# ------------------------
-# STARTUP
-# ------------------------
+def fetch_time():
 
-threading.Thread(target=start_api, daemon=True).start()
+    global LOCK_ID
 
-auto_load_saved_lock()
+    if not LOCK_ID:
+        root.after(1000, fetch_time)
+        return
 
-update_timer()
+    user = user_entry.get().strip()
 
+    try:
+
+        r = requests.get(f"{BACKEND}/lock/{user}/{LOCK_ID}")
+
+        data = r.json()
+
+        end = data.get("end_date")
+
+        if not end:
+            timer_label.config(text="TIMER HIDDEN")
+        else:
+
+            end_time = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+
+            remaining = end_time - datetime.utcnow()
+
+            seconds = int(remaining.total_seconds())
+
+            if seconds <= 0:
+                timer_label.config(text="UNLOCKED")
+            else:
+
+                d = seconds // 86400
+                h = (seconds % 86400) // 3600
+                m = (seconds % 3600) // 60
+                s = seconds % 60
+
+                timer_label.config(text=f"{d}d {h}h {m}m {s}s")
+
+    except Exception as e:
+
+        print("Timer error:", e)
+
+    root.after(1000, fetch_time)
+
+
+def add_time():
+
+    global LOCK_ID
+
+    user = user_entry.get().strip()
+
+    if not user or not LOCK_ID:
+        return
+
+    try:
+
+        r = requests.post(f"{BACKEND}/addtime/{user}/{LOCK_ID}")
+
+        print("Add time response:",r.text)
+
+    except Exception as e:
+
+        print("Add time error:",e)
+
+# -------------------------
+# LOCK SELECTION
+# -------------------------
+
+def save_lock():
+
+    global LOCK_ID
+
+    idx = lock_dropdown.current()
+
+    if idx < 0:
+        return
+
+    lock = locks[idx]
+
+    LOCK_ID = lock["_id"]
+
+    keyholder = lock.get("keyholder","Unknown")
+
+    keyholder_label.config(text=f"KEYHOLDER: {keyholder["username"]}")
+
+    set_key(ENV_FILE,"LOCK_ID",LOCK_ID)
+
+# -------------------------
+# GUI
+# -------------------------
+
+root = tk.Tk()
+root.title("Resonite X Chaster Timer")
+root.geometry("520x420")
+root.configure(bg=BG)
+
+title = tk.Label(
+    root,
+    text="RESONITE X CHASTER TIMER",
+    bg=BG,
+    fg=CYAN,
+    font=("Consolas",18,"bold")
+)
+
+title.pack(pady=10)
+
+# USER ID
+
+user_label = tk.Label(root,text="USER ID",bg=BG,fg=TEXT)
+user_label.pack()
+
+user_entry = tk.Entry(root,width=50,bg=PANEL,fg=GREEN,insertbackground=GREEN)
+user_entry.pack(pady=5)
+
+if USER_ID:
+    user_entry.insert(0,USER_ID)
+
+# LOCK SELECT
+
+lock_dropdown = ttk.Combobox(root,width=55)
+lock_dropdown.pack(pady=10)
+
+keyholder_label = tk.Label(
+    root,
+    text="KEYHOLDER: UNKNOWN",
+    bg=BG,
+    fg=CYAN
+)
+
+keyholder_label.pack()
+
+# BUTTONS
+
+button_frame = tk.Frame(root,bg=BG)
+button_frame.pack(pady=10)
+
+fetch_button = tk.Button(
+    button_frame,
+    text="FETCH LOCKS",
+    command=fetch_locks,
+    bg=PANEL,
+    fg=CYAN
+)
+
+fetch_button.grid(row=0,column=0,padx=10)
+
+save_button = tk.Button(
+    button_frame,
+    text="SAVE LOCK",
+    command=save_lock,
+    bg=PANEL,
+    fg=GREEN
+)
+
+save_button.grid(row=0,column=1,padx=10)
+
+add_button = tk.Button(
+    root,
+    text="+1 HOUR",
+    command=add_time,
+    bg=PANEL,
+    fg=CYAN
+)
+
+add_button.pack(pady=10)
+
+# TIMER DISPLAY
+
+timer_label = tk.Label(
+    root,
+    text="NOT CONFIGURED",
+    bg=BG,
+    fg=GREEN,
+    font=("Consolas",30,"bold")
+)
+
+timer_label.pack(pady=40)
+
+# START TIMER LOOP
+
+fetch_time()
+
+if USER_ID:
+    fetch_locks()
+    
 root.mainloop()

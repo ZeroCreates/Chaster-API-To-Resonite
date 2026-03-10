@@ -67,19 +67,9 @@ Content-Type: application/json
 }
 
 --------------------------------
-Folder / Asset Info
+Folder
 --------------------------------
 Resonite Folder Path: [Insert your Resonite folder path here]
-
-- Place any assets (images, icons, etc.) here if needed by the app
-- .exe will use this folder for styling and resources
-
---------------------------------
-Sharing
---------------------------------
-1. Send Resonite X Chaster Timer.exe
-2. Optionally include .env if you want preconfigured token and lock
-3. Users can double-click .exe — no Python, pip, or setup required
 
 --------------------------------
 Notes
