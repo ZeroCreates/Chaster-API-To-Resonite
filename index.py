@@ -141,13 +141,9 @@ def add_time():
 
     if not token or not lock_id:
         return jsonify({"error": "Lock not configured"}), 400
+    
 
-    data = request.json
-
-    if not data or "milseconds" not in data:
-        return jsonify({"error": "Missing 'milseconds' field"}), 400
-
-    milseconds = int(data["milseconds"])
+    milseconds = int(3600000)
 
     url = f"https://api.chaster.app/locks/{lock_id}/update-time"
 
