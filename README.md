@@ -35,11 +35,11 @@ First Time Setup
 1. Run Resonite X Chaster Timer.exe
 2. Click "Login With Chaster"
 3. Click "yes"
-4a. Then the page will ask to access your local network (this is not required but will make it easyer)
-4b. if you choose not to you will need to enter the user id manually
-3. Click "Fetch Locks"
-4. Select your lock from the dropdown
-5. Click "Save Lock"
+4. Then the page will ask to access your local network (this is not required but will make it easyer)
+5. if you choose not to you will need to enter the user id manually
+6. Click "Fetch Locks"
+7. Select your lock from the dropdown
+8. Click "Save Lock"
 
 - The .env file is created automatically in the same folder as the .exe
 - On subsequent runs, your token and lock are restored automatically
