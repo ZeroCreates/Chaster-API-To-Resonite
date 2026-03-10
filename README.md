@@ -16,10 +16,10 @@ Features
 - Shows remaining lock time, updates every second
 - Handles hidden timers gracefully
 - Displays keyholder username
-- Auto-saves API token and lock ID in .env
+- Auto-saves Login and lock ID in .env
 - Auto-restores settings on reopen
-- POST endpoint to add time to a lock (default +1 hour)
-- Local /timeleft API for external use
+- POST endpoint to add time to a lock (+1 hour)
+- Local /time API for external use
 - Fully self-contained .exe — no Python install required
 
 --------------------------------
@@ -33,7 +33,10 @@ Requirements
 First Time Setup
 --------------------------------
 1. Run Resonite X Chaster Timer.exe
-2. Enter your Chaster API Token
+2. Click "Login With Chaster"
+3. Click "yes"
+4a. Then the page will ask to access your local network (this is not required but will make it easyer)
+4b. if you choose not to you will need to enter the user id manually
 3. Click "Fetch Locks"
 4. Select your lock from the dropdown
 5. Click "Save Lock"
@@ -45,31 +48,16 @@ First Time Setup
 Local API Usage
 --------------------------------
 GET Remaining Time:
-http://localhost:5000/timeleft
+http://localhost:5000/time
 Example response:
 5d 12h 03m 21s
 or if the timer is hidden:
 hidden
 
 POST Add Time to Lock:
-http://localhost:5000/addtime
-Content-Type: application/json
+http://localhost:5000/add-time
 
-{
-  "seconds": 3600
-}
-
-- Adds 1 hour (3600 seconds) to the lock
-- Returns:
-{
-  "status": "success",
-  "added_seconds": 3600
-}
-
---------------------------------
-Folder
---------------------------------
-Resonite Folder Path: [Insert your Resonite folder path here]
+will only add a hour
 
 --------------------------------
 Notes

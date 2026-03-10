@@ -6,12 +6,13 @@ from tkinter import ttk
 from flask import Flask, request
 from dotenv import load_dotenv, set_key
 from datetime import datetime
-
+import webbrowser
+from flask_cors import CORS
 # -------------------------
 # CONFIG
 # -------------------------
 
-BACKEND = "https://chaster.zerocreates.org/"  # CHANGE THIS
+BACKEND = "https://chaster.zerocreates.org"  # CHANGE THIS
 
 ENV_FILE = ".env"
 
@@ -40,6 +41,7 @@ TEXT = "#e0e0e0"
 # -------------------------
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/set-user", methods=["POST"])
 def set_user():
@@ -55,6 +57,7 @@ def set_user():
 
         user_entry.delete(0,"end")
         user_entry.insert(0,user)
+        user_entry.config(state="disabled")
 
         set_key(ENV_FILE,"USER_ID",user)
 
@@ -116,7 +119,10 @@ def fetch_locks():
 
         print("STATUS:", r.status_code)
         print("RESPONSE:", r.text)
-
+        if r.status_code == 500:
+            open(ENV_FILE, "w").close()
+            user_entry.delete(0,"end")
+            return
         locks = r.json()
 
         options = []
@@ -274,6 +280,7 @@ user_entry.pack(pady=5)
 
 if USER_ID:
     user_entry.insert(0,USER_ID)
+    user_entry.config(state="disabled")
 
 # LOCK SELECT
 
@@ -333,6 +340,18 @@ timer_label = tk.Label(
     fg=GREEN,
     font=("Consolas",30,"bold")
 )
+def open_login_page():
+    # Replace with your backend login URL
+    login_url = f"{BACKEND}/login"
+    webbrowser.open(login_url)
+login_button = tk.Button(
+    root,
+    text="LOGIN WITH CHASTER",
+    command=open_login_page,
+    bg=PANEL,
+    fg=CYAN
+)
+login_button.pack(pady=10)
 
 timer_label.pack(pady=40)
 

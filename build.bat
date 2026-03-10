@@ -1,6 +1,6 @@
 
-pip -r requirements.txt
+pip install -r requirements.txt
 
-pyinstaller --noconsole --onefile --name "Resonite X Chaster Timer" index.py
+python -m PyInstaller --noconsole --onefile --name "ResoniteXChasterTimer" index.py
 
 pause

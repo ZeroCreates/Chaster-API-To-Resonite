@@ -151,6 +151,7 @@ imports:
  &#8226;   <a href="#encodings.zlib_codec">encodings.zlib_codec</a>
  &#8226;   <a href="#enum">enum</a>
  &#8226;   <a href="#flask">flask</a>
+ &#8226;   <a href="#flask_cors">flask_cors</a>
  &#8226;   <a href="#functools">functools</a>
  &#8226;   <a href="#genericpath">genericpath</a>
  &#8226;   <a href="#heapq">heapq</a>
@@ -185,6 +186,7 @@ imports:
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#warnings">warnings</a>
  &#8226;   <a href="#weakref">weakref</a>
+ &#8226;   <a href="#webbrowser">webbrowser</a>
 
   </div>
 
@@ -363,6 +365,7 @@ imported by:
  &#8226;   <a href="#flask.cli">flask.cli</a>
  &#8226;   <a href="#flask.sessions">flask.sessions</a>
  &#8226;   <a href="#flask.typing">flask.typing</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
  &#8226;   <a href="#http.client">http.client</a>
  &#8226;   <a href="#importlib.resources.readers">importlib.resources.readers</a>
  &#8226;   <a href="#inspect">inspect</a>
@@ -6196,6 +6199,7 @@ imported by:
  &#8226;   <a href="#flask.json.tag">flask.json.tag</a>
  &#8226;   <a href="#flask.sansio.app">flask.sansio.app</a>
  &#8226;   <a href="#flask.sessions">flask.sessions</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#http.server">http.server</a>
  &#8226;   <a href="#index.py">index.py</a>
@@ -9628,6 +9632,9 @@ imported by:
  &#8226;   <a href="#flask.testing">flask.testing</a>
  &#8226;   <a href="#flask.typing">flask.typing</a>
  &#8226;   <a href="#flask.wrappers">flask.wrappers</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
+ &#8226;   <a href="#flask_cors.decorator">flask_cors.decorator</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
  &#8226;   <a href="#index.py">index.py</a>
 
   </div>
@@ -10320,6 +10327,108 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="flask_cors"></a>
+  <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/flask_cors/__init__.py" type="text/plain"><tt>flask_cors</tt></a>
+<span class="moduletype">Package</span>  <div class="import">
+imports:
+    <a href="#flask_cors.decorator">flask_cors.decorator</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
+ &#8226;   <a href="#flask_cors.version">flask_cors.version</a>
+ &#8226;   <a href="#logging">logging</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#flask_cors.core">flask_cors.core</a>
+ &#8226;   <a href="#flask_cors.decorator">flask_cors.decorator</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
+ &#8226;   <a href="#flask_cors.version">flask_cors.version</a>
+ &#8226;   <a href="#index.py">index.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="flask_cors.core"></a>
+  <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/flask_cors/core.py" type="text/plain"><tt>flask_cors.core</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#'collections.abc'">'collections.abc'</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#flask">flask</a>
+ &#8226;   <a href="#flask_cors">flask_cors</a>
+ &#8226;   <a href="#logging">logging</a>
+ &#8226;   <a href="#re">re</a>
+ &#8226;   <a href="#werkzeug.datastructures">werkzeug.datastructures</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#flask_cors.decorator">flask_cors.decorator</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="flask_cors.decorator"></a>
+  <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/flask_cors/decorator.py" type="text/plain"><tt>flask_cors.decorator</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#flask">flask</a>
+ &#8226;   <a href="#flask_cors">flask_cors</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
+ &#8226;   <a href="#functools">functools</a>
+ &#8226;   <a href="#logging">logging</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#flask_cors">flask_cors</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="flask_cors.extension"></a>
+  <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/flask_cors/extension.py" type="text/plain"><tt>flask_cors.extension</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#flask">flask</a>
+ &#8226;   <a href="#flask_cors">flask_cors</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
+ &#8226;   <a href="#logging">logging</a>
+ &#8226;   <a href="#urllib.parse">urllib.parse</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#flask_cors">flask_cors</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="flask_cors.version"></a>
+  <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/site-packages/flask_cors/version.py" type="text/plain"><tt>flask_cors.version</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#flask_cors">flask_cors</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#flask_cors">flask_cors</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="fnmatch"></a>
   <a target="code" href="///C:/Users/zeros/AppData/Local/Python/pythoncore-3.14-64/Lib/fnmatch.py" type="text/plain"><tt>fnmatch</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
@@ -10438,6 +10547,7 @@ imported by:
  &#8226;   <a href="#flask.helpers">flask.helpers</a>
  &#8226;   <a href="#flask.sansio.blueprints">flask.sansio.blueprints</a>
  &#8226;   <a href="#flask.sansio.scaffold">flask.sansio.scaffold</a>
+ &#8226;   <a href="#flask_cors.decorator">flask_cors.decorator</a>
  &#8226;   <a href="#fnmatch">fnmatch</a>
  &#8226;   <a href="#fractions">fractions</a>
  &#8226;   <a href="#glob">glob</a>
@@ -13120,6 +13230,10 @@ imported by:
  &#8226;   <a href="#dotenv.main">dotenv.main</a>
  &#8226;   <a href="#flask.logging">flask.logging</a>
  &#8226;   <a href="#flask.sansio.app">flask.sansio.app</a>
+ &#8226;   <a href="#flask_cors">flask_cors</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
+ &#8226;   <a href="#flask_cors.decorator">flask_cors.decorator</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
  &#8226;   <a href="#hashlib">hashlib</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#jinja2.runtime">jinja2.runtime</a>
@@ -15584,6 +15698,7 @@ imported by:
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#encodings.idna">encodings.idna</a>
  &#8226;   <a href="#flask.cli">flask.cli</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
  &#8226;   <a href="#fnmatch">fnmatch</a>
  &#8226;   <a href="#fractions">fractions</a>
  &#8226;   <a href="#ftplib">ftplib</a>
@@ -22501,6 +22616,7 @@ imported by:
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#flask.app">flask.app</a>
  &#8226;   <a href="#flask.testing">flask.testing</a>
+ &#8226;   <a href="#flask_cors.extension">flask_cors.extension</a>
  &#8226;   <a href="#http.client">http.client</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#http.server">http.server</a>
@@ -23972,6 +24088,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#click._termui_impl">click._termui_impl</a>
+ &#8226;   <a href="#index.py">index.py</a>
  &#8226;   <a href="#pydoc">pydoc</a>
 
   </div>
@@ -24123,6 +24240,7 @@ imported by:
     <a href="#flask.app">flask.app</a>
  &#8226;   <a href="#flask.sessions">flask.sessions</a>
  &#8226;   <a href="#flask.typing">flask.typing</a>
+ &#8226;   <a href="#flask_cors.core">flask_cors.core</a>
  &#8226;   <a href="#werkzeug.datastructures.accept">werkzeug.datastructures.accept</a>
  &#8226;   <a href="#werkzeug.datastructures.auth">werkzeug.datastructures.auth</a>
  &#8226;   <a href="#werkzeug.datastructures.cache_control">werkzeug.datastructures.cache_control</a>
