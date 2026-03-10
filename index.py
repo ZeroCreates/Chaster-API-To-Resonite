@@ -7,7 +7,10 @@ from tkinter import ttk
 from datetime import datetime, timezone
 from dotenv import load_dotenv, set_key
 from flask import Flask
-
+# Ensure .env exists
+if not os.path.exists(".env"):
+    with open(".env", "w") as f:
+        f.write("")  # empty file
 load_dotenv()
 
 ENV_FILE = ".env"
