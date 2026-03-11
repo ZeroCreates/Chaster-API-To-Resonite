@@ -73,7 +73,10 @@ def api_add_time():
     try:
 
         add_time()  # call your existing function
-
+        messagebox.showinfo(
+                "Time Added",
+                f"1 hour has been added to your time"
+            )
         return "success"
 
     except Exception as e:
