@@ -114,8 +114,6 @@ def fetch_locks():
         if r.status_code == 500:
             open(ENV_FILE, "w").close()
             user_entry.delete(0,"end")
-            return
-        if r.status_code == 500:
             messagebox.showerror(
                 "Server MSG",
                 f"The server returned an msg.\n\nResponse:\n{r.text}"
