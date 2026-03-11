@@ -9,7 +9,7 @@ from datetime import datetime,timezone
 import webbrowser
 from flask_cors import CORS
 from dateutil import parser
-
+from tkinter import messagebox
 # -------------------------
 # CONFIG
 # -------------------------
@@ -115,6 +115,12 @@ def fetch_locks():
             open(ENV_FILE, "w").close()
             user_entry.delete(0,"end")
             return
+        if r.status_code == 500:
+            messagebox.showerror(
+                "Server MSG",
+                f"The server returned an msg.\n\nResponse:\n{r.text}"
+            )
+            return
         locks = r.json()
 
         options = []
@@ -168,6 +174,12 @@ def fetch_time():
     try:
 
         r = requests.get(f"{BACKEND}/lock/{user}/{LOCK_ID}")
+        if r.status_code == 500:
+            messagebox.showerror(
+                "Server MSG",
+                f"The server returned an msg.\n\nResponse:\n{r.text}"
+            )
+            return
         print("STATUS:", r.status_code)
         print("RESPONSE:", r.text)
         data = r.json()
@@ -215,7 +227,12 @@ def add_time():
     try:
 
         r = requests.post(f"{BACKEND}/addtime/{user}/{LOCK_ID}")
-
+        if r.status_code == 500:
+            messagebox.showerror(
+                "Server MSG",
+                f"The server returned an msg.\n\nResponse:\n{r.text}"
+            )
+            return
         print("Add time response:",r.text)
 
     except Exception as e:
