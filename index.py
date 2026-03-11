@@ -5,9 +5,11 @@ import tkinter as tk
 from tkinter import ttk
 from flask import Flask, request
 from dotenv import load_dotenv, set_key
-from datetime import datetime
+from datetime import datetime,timezone
 import webbrowser
 from flask_cors import CORS
+from dateutil import parser
+
 # -------------------------
 # CONFIG
 # -------------------------
@@ -72,26 +74,16 @@ def api_add_time():
 
         add_time()  # call your existing function
 
-        return jsonify({
-            "success": True,
-            "message": "1 hour added"
-        })
+        return "success"
 
     except Exception as e:
 
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return "Fail"
 
 @app.route("/time", methods=["GET"])
 def get_time():
 
-    return jsonify({
-        "remaining": timer_label.cget("text"),
-        "lock_id": LOCK_ID,
-        "user_id": USER_ID
-    })
+    return timer_label.cget("text")
 
 def run_server():
     app.run(port=5000)
@@ -176,18 +168,20 @@ def fetch_time():
     try:
 
         r = requests.get(f"{BACKEND}/lock/{user}/{LOCK_ID}")
-
+        print("STATUS:", r.status_code)
+        print("RESPONSE:", r.text)
         data = r.json()
 
-        end = data.get("end_date")
+        end = data.get("endDate")
 
         if not end:
             timer_label.config(text="TIMER HIDDEN")
         else:
 
-            end_time = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+            
+            end_time = parser.isoparse(end)
 
-            remaining = end_time - datetime.utcnow()
+            remaining = end_time - datetime.now(timezone.utc)
 
             seconds = int(remaining.total_seconds())
 
