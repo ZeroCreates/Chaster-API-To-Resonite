@@ -221,13 +221,13 @@ def add_time():
     global LOCK_ID
 
     user = user_entry.get().strip()
-
+    time_value = time_entry.get().strip()
     if not user or not LOCK_ID:
         return
 
     try:
 
-        r = requests.post(f"{BACKEND}/addtime/{user}/{LOCK_ID}")
+        r = requests.post(f"{BACKEND}/addtime/{user}/{LOCK_ID}/{time_value}")
         if r.status_code == 500:
             messagebox.showerror(
                 "Server MSG",
@@ -235,7 +235,7 @@ def add_time():
             )
             return
         print("Add time response:",r.text)
-
+        set_key(ENV_FILE,"TIME",time_value)
     except Exception as e:
 
         print("Add time error:",e)
@@ -333,16 +333,21 @@ save_button = tk.Button(
 
 save_button.grid(row=0,column=1,padx=10)
 
+
+time_label = tk.Label(root, text="ADD TIME (seconds)", bg=BG, fg=CYAN)
+time_label.pack()
+
+time_entry = tk.Entry(root, bg=PANEL, fg=CYAN, insertbackground=CYAN)
+time_entry.pack(pady=5)
 add_button = tk.Button(
     root,
-    text="+1 HOUR",
+    text="ADD TIME",
     command=add_time,
     bg=PANEL,
     fg=CYAN
 )
 
 add_button.pack(pady=10)
-
 # TIMER DISPLAY
 
 timer_label = tk.Label(
@@ -366,7 +371,10 @@ login_button = tk.Button(
 login_button.pack(pady=10)
 
 timer_label.pack(pady=40)
-
+TIME = os.getenv("TIME")
+if TIME:
+    time_entry.insert(0,TIME)
+    time_entry.config(state="disabled")
 # START TIMER LOOP
 
 fetch_time()
