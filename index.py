@@ -12,7 +12,6 @@ import pystray
 from PIL import Image, ImageDraw
 from flask_cors import CORS
 from dateutil import parser
-from tkinter import messagebox
 
 CURRENT_VERSION = "1.5.0"
 
@@ -29,10 +28,7 @@ def check_for_updates():
         print("Latest:", latest_version)
 
         if latest_version != CURRENT_VERSION:
-            messagebox.showinfo(
-                "Update Available",
-                "There is a new version for this app.\n\nGet it on the GitHub."
-            )
+            notify("Update available. Get the latest version on GitHub.", GREEN)
 
     except Exception as e:
         print("Update check failed:", e)
@@ -74,6 +70,27 @@ PANEL = "#111111"
 CYAN = "#00ffff"
 GREEN = "#00ff9c"
 TEXT = "#e0e0e0"
+ERROR = "#ff5555"
+
+notification_after_id = None
+
+
+def notify(message, color=CYAN, duration=4000):
+    global notification_after_id
+
+    def display():
+        global notification_after_id
+
+        if notification_after_id:
+            root.after_cancel(notification_after_id)
+
+        notification_label.config(text=message, fg=color)
+        notification_after_id = root.after(
+            duration,
+            lambda: notification_label.config(text=""),
+        )
+
+    root.after(0, display)
 
 # -------------------------
 # LOCAL SERVER
@@ -94,9 +111,12 @@ def set_user():
 
         USER_ID = user
 
-        user_entry.delete(0,"end")
-        user_entry.insert(0,user)
-        user_entry.config(state="disabled")
+        def apply_user():
+            user_entry.delete(0, "end")
+            user_entry.insert(0, user)
+            user_entry.config(state="disabled")
+
+        root.after(0, apply_user)
 
         set_key(ENV_FILE,"USER_ID",user)
 
@@ -143,13 +163,13 @@ def api_add_time():
 
     try:
 
-        add_time()  # call your existing function
-        
-        return "success"
+        root.after(0, add_time)
+        return {"status": "queued"}, 202
 
     except Exception as e:
 
-        return "Fail"
+        print("API add time error:", e)
+        return {"status": "error"}, 500
 
 @app.route("/time", methods=["GET"])
 def get_time():
@@ -263,10 +283,7 @@ def fetch_locks():
         if r.status_code == 500:
             open(ENV_FILE, "w").close()
             user_entry.delete(0,"end")
-            messagebox.showerror(
-                "Server MSG",
-                f"The server returned an msg.\n\nResponse:\n{r.text}"
-            )
+            notify(f"Server error while fetching locks: {r.text}", ERROR)
             return
         locks = r.json()
 
@@ -317,10 +334,7 @@ def fetch_time():
 
         r = requests.get(f"{BACKEND}/lock/{user}/{LOCK_ID}", timeout=5)
         if r.status_code == 500:
-            messagebox.showerror(
-                "Server MSG",
-                f"The server returned an msg.\n\nResponse:\n{r.text}"
-            )
+            notify(f"Server error while fetching timer: {r.text}", ERROR)
             return
         print("STATUS:", r.status_code)
         print("RESPONSE:", r.text)
@@ -365,16 +379,16 @@ def fetch_time():
 
 def validate_time_value(time_value):
     if not time_value:
-        messagebox.showerror("Invalid Time", "Enter an amount of time in seconds.")
+        notify("Enter an amount of time in seconds.", ERROR)
         return None
 
     if not time_value.isdigit():
-        messagebox.showerror("Invalid Time", "Time must be a positive whole number of seconds.")
+        notify("Time must be a positive whole number of seconds.", ERROR)
         return None
 
     seconds = int(time_value)
     if seconds <= 0:
-        messagebox.showerror("Invalid Time", "Time must be greater than zero.")
+        notify("Time must be greater than zero.", ERROR)
         return None
 
     return seconds
@@ -388,11 +402,11 @@ def add_time():
     time_value = time_entry.get().strip()
 
     if not user:
-        messagebox.showerror("Missing User", "Please enter or log in with your User ID first.")
+        notify("Please enter or log in with your User ID first.", ERROR)
         return
 
     if not LOCK_ID:
-        messagebox.showerror("Missing Lock", "Please save a lock before adding time.")
+        notify("Please save a lock before adding time.", ERROR)
         return
 
     seconds = validate_time_value(time_value)
@@ -403,10 +417,7 @@ def add_time():
 
         r = requests.post(f"{BACKEND}/addtime/{user}/{LOCK_ID}/{seconds}", timeout=5)
         if r.status_code == 500:
-            messagebox.showerror(
-                "Server MSG",
-                f"The server returned an msg.\n\nResponse:\n{r.text}"
-            )
+            notify(f"Server error while adding time: {r.text}", ERROR)
             return
         print("Add time response:", r.text)
         set_key(ENV_FILE, "TIME", str(seconds))
@@ -423,10 +434,7 @@ def add_time():
             timestring = timestring + f"{m}m "
         if s != 0:
             timestring = timestring + f"{s}s "
-        messagebox.showinfo(
-                "Time Added",
-                f"{timestring} has been added to your time"
-            )
+        notify(f"{timestring}has been added to your time.", GREEN)
         fetch_time()
     except Exception as e:
 
@@ -489,6 +497,7 @@ def main():
     global time_entry
     global timer_label
     global add_button
+    global notification_label
 
     root = tk.Tk()
     root.title("Resonite X Chaster Timer")
@@ -664,6 +673,14 @@ def main():
         font=("Consolas", 30, "bold"),
     )
 
+    notification_label = tk.Label(
+        shell,
+        text="",
+        bg=PANEL,
+        fg=CYAN,
+        font=("Consolas", 10, "bold"),
+    )
+
     login_button = tk.Button(
         shell,
         text="LOGIN WITH CHASTER",
@@ -681,6 +698,7 @@ def main():
     login_button.pack(pady=(6, 0))
 
     timer_label.pack(pady=(22, 12))
+    notification_label.pack(pady=(0, 8))
 
     TIME = os.getenv("TIME")
     if TIME:
