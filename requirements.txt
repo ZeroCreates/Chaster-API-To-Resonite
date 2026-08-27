@@ -4,3 +4,5 @@ python-dotenv
 flask_cors
 python-dateutil
 PyInstaller
+pystray
+Pillow

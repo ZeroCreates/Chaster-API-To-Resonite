@@ -18,6 +18,7 @@ Features
 - Exposes a local API to add time to a lock
 - Provides a local /time endpoint for external use
 - Fully self-contained .exe — no Python install required
+- Closing the window hides the app in the Windows notification area; use the tray menu to show or exit it
 
 --------------------------------
 Requirements

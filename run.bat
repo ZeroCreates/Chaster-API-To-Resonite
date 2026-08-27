@@ -1,1 +1,1 @@
-py ./index.py
+pyw ./index.py

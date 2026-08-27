@@ -8,6 +8,8 @@ from flask import Flask, request
 from dotenv import load_dotenv, set_key
 from datetime import datetime,timezone
 import webbrowser
+import pystray
+from PIL import Image, ImageDraw
 from flask_cors import CORS
 from dateutil import parser
 from tkinter import messagebox
@@ -61,6 +63,7 @@ LOCK_ID = os.getenv("LOCK_ID")
 
 locks = []
 frozen_remaining_seconds = None
+tray_icon = None
 
 # -------------------------
 # COLORS
@@ -170,6 +173,55 @@ def run_server():
     app.run(port=5000)
 
 threading.Thread(target=run_server,daemon=True).start()
+
+
+# -------------------------
+# SYSTEM TRAY
+# -------------------------
+
+def create_tray_image():
+    image = Image.new("RGB", (64, 64), BG)
+    draw = ImageDraw.Draw(image)
+    draw.rectangle((6, 6, 58, 58), outline=CYAN, width=3)
+    draw.line((16, 32, 48, 32), fill=GREEN, width=4)
+    draw.line((32, 16, 32, 48), fill=GREEN, width=4)
+    return image
+
+
+def show_window(icon=None, item=None):
+    root.after(0, _show_window)
+
+
+def _show_window():
+    root.deiconify()
+    root.state("normal")
+    root.lift()
+    root.focus_force()
+
+
+def hide_window():
+    root.withdraw()
+
+
+def exit_app(icon=None, item=None):
+    if icon is not None:
+        icon.stop()
+    root.after(0, root.destroy)
+
+
+def start_tray():
+    global tray_icon
+
+    tray_icon = pystray.Icon(
+        "resonite_x_chaster_timer",
+        create_tray_image(),
+        "Resonite X Chaster Timer",
+        menu=pystray.Menu(
+            pystray.MenuItem("Show", show_window, default=True),
+            pystray.MenuItem("Exit", exit_app),
+        ),
+    )
+    tray_icon.run()
 
 # -------------------------
 # API FUNCTIONS
@@ -443,6 +495,9 @@ def main():
     root.geometry("560x600")
     root.minsize(560, 600)
     root.configure(bg=BG)
+    root.protocol("WM_DELETE_WINDOW", hide_window)
+
+    threading.Thread(target=start_tray, daemon=True).start()
 
     style = ttk.Style(root)
     style.theme_use("clam")
